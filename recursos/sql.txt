@@ -1,0 +1,41 @@
+CREATE TABLE usuarios (
+    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    contrasena VARCHAR(255) NOT NULL,
+    rol ENUM('admin', 'usuario') DEFAULT 'usuario',
+    estado ENUM('activo', 'inactivo') DEFAULT 'activo',
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE animales_perdidos (
+    id_animal INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_animal VARCHAR(100),
+    especie VARCHAR(100) NOT NULL,
+    raza VARCHAR(100),
+    color VARCHAR(50),
+    descripcion VARCHAR(200),
+    fecha_perdida DATE,
+    estado ENUM('perdido', 'encontrado') DEFAULT 'perdido',
+    id_usuario INT,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    fecha_reporte TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE fotos_animales (
+    id_foto INT AUTO_INCREMENT PRIMARY KEY,
+    id_animal INT,
+    url_foto VARCHAR(255) NOT NULL,
+    FOREIGN KEY (id_animal) REFERENCES animales_perdidos(id_animal) ON DELETE CASCADE,
+    fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE ubicaciones (
+    id_ubicacion INT AUTO_INCREMENT PRIMARY KEY,
+    id_animal INT,
+    latitud DECIMAL(9,6) NOT NULL,
+    longitud DECIMAL(9,6) NOT NULL,
+    direccion VARCHAR(255),
+    fecha_visto TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_animal) REFERENCES animales_perdidos(id_animal) ON DELETE CASCADE
+);
