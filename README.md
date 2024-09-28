@@ -40,3 +40,8 @@ Esta API RESTful proporciona un conjunto de endpoints para gestionar usuarios, a
 
    ```bash
    npm run dev
+
+4. **Ejecutar prueba:** Este comando iniciará la ejecucion de pruebas declaradas para el proyecto..
+
+   ```bash
+   npm run test

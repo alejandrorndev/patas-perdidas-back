@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require("express");
 const UsuariosRutas = require('./rutas/UsuariosRutas');
+const AnimalesRutas = require('./rutas/AnimalesRutas');
 const { swaggerDocs } = require('./swagger');
 
 
@@ -12,6 +13,7 @@ const app = express();
 app.use(express.json());
 
 app.use("/api/usuarios", UsuariosRutas);
+app.use("/api/animales", AnimalesRutas);
 
 
 if (process.env.NODE_ENV !== 'test') {
