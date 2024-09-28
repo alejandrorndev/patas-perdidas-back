@@ -2,6 +2,12 @@ const express = require("express");
 const router = express.Router();
 const Autenticacion = require("../configuracion/Autenticacion");
 const usuarioControlador = require('../controladores/UsuarioControlador');
+const {
+    validardorRegistroUsuario,
+    validardorInicioSesion,
+    validardorUsuarioId,
+    validardorActualizacionUsuario
+} = require('../validaciones/validacionUsuarios');
 
 /**
  * @swagger
@@ -119,7 +125,7 @@ const usuarioControlador = require('../controladores/UsuarioControlador');
  *         description: Error interno del servidor
  */
 
-router.post("/",usuarioControlador.RegistrarUsuario);
+router.post("/",validardorRegistroUsuario,usuarioControlador.RegistrarUsuario);
 
 /**
  * @swagger
@@ -211,7 +217,7 @@ router.post("/",usuarioControlador.RegistrarUsuario);
  *         description: Error interno del servidor
  */
 
-router.post("/inicio-sesion",usuarioControlador.InicioDeSesion);
+router.post("/inicio-sesion",validardorInicioSesion,usuarioControlador.InicioDeSesion);
 
 /**
  * @swagger
@@ -388,7 +394,7 @@ router.get("/", Autenticacion, usuarioControlador.ObtenerUsuarios);
  *         description: Error interno del servidor
  */
 
-router.get("/:usuarioId",Autenticacion,usuarioControlador.ObtenerUsuario);
+router.get("/:usuarioId",validardorUsuarioId,Autenticacion,usuarioControlador.ObtenerUsuario);
 
 /**
  * @swagger
@@ -532,7 +538,7 @@ router.get("/:usuarioId",Autenticacion,usuarioControlador.ObtenerUsuario);
  *         description: Error interno del servidor
  */
 
-router.put("/:usuarioId",Autenticacion,usuarioControlador.ActualizarUsuario);
+router.put("/:usuarioId",validardorActualizacionUsuario,Autenticacion,usuarioControlador.ActualizarUsuario);
 
 /**
  * @swagger
@@ -631,7 +637,7 @@ router.put("/:usuarioId",Autenticacion,usuarioControlador.ActualizarUsuario);
  *                   example: "Error al eliminar el usuario: No se pudo verificar la existencia del usuario con ID 200"
  */
 
-router.delete("/:usuarioId",Autenticacion,usuarioControlador.EliminarUsuario);
+router.delete("/:usuarioId",validardorUsuarioId,Autenticacion,usuarioControlador.EliminarUsuario);
 
 module.exports = router;
 

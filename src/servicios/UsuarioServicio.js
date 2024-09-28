@@ -66,8 +66,8 @@ const InicioDeSesion = async (user) => {
 
     const accessToken = jwt.sign(
       {
-        name: databaseUser[0].name,
-        id: databaseUser[0].id,
+        nombre: databaseUser[0].nombre,
+        id_usuario: databaseUser[0].id_usuario,
       },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "60m" }
@@ -75,8 +75,8 @@ const InicioDeSesion = async (user) => {
 
     const refreshToken = jwt.sign(
       {
-        name: databaseUser[0].name,
-        id: databaseUser[0].id,
+        nombre: databaseUser[0].nombre,
+        id_usuario: databaseUser[0].id_usuario,
       },
       process.env.REFRESH_TOKEN_SECRET
     );

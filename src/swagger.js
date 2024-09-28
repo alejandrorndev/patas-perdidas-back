@@ -23,7 +23,7 @@ const options = {
       },
     ],
   },
-  apis: ["src/rutas/UsuariosRutas.js"],
+  apis: ["src/rutas/UsuariosRutas.js","src/rutas/AnimalesRutas.js"],
 };
 
 
