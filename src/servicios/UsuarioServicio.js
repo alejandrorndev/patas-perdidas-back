@@ -118,7 +118,7 @@ const ObtenerUsuario = async (usuarioId) => {
     try {
       const connection = await getConnection();
 
-      const queryXusurio =`
+      const queryXusuario =`
                 SELECT
                   u.id_usuario,
                   u.nombre,
@@ -139,7 +139,7 @@ const ObtenerUsuario = async (usuarioId) => {
                 WHERE id_usuario = ?
               `;  
   
-      const result = await connection.query(queryXusurio,[usuarioId]
+      const result = await connection.query(queryXusuario,[usuarioId]
       );
       if (result.length === 0) {
         return null;
