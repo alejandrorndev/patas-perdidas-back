@@ -28,7 +28,7 @@ const rutaImagen = imagenes;
     color,
     descripcion,
     fecha_perdida,
-    estado:'perdido',
+    estado:0,
     id_usuario,
     fecha_reporte: date_time
   }
@@ -74,7 +74,7 @@ const rutaImagen = imagenes;
 
       
     return { 
-            id:id_Animal_autogenerado, 
+            id_animal:id_Animal_autogenerado, 
             nombre: AnimalaRegistrar.nombre,
             especie:AnimalaRegistrar.especie,
             raza:AnimalaRegistrar.raza,
@@ -141,7 +141,10 @@ const ObtenerAnimales= async () => {
             ap.raza,
             ap.color,
             ap.descripcion,
-            ap.estado,
+            CASE
+                WHEN ap.estado = 1 THEN 'encontrado'
+                WHEN ap.estado = 0 THEN 'perdido'
+              END AS estado,
             ub.direccion AS direccion,
             ap.fecha_perdida,
             u.nombre AS nombre_usuario,
