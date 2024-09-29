@@ -2,13 +2,13 @@ const express = require('express');
 const router = express.Router();
 const Autenticacion = require("../configuracion/Autenticacion");
 const AnimalControlador = require('../controladores/AnimalControlador');
-const { obtenerUsuarioAutenticado } = require('../servicios/AnimalServicio');
+const { ObtenerUsuarioAutenticado } = require('../servicios/AnimalServicio');
 const multer = require('multer');
 const path = require('path');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, 'src/imagenes_animales');
+      cb(null, 'public/imagenes_animales');
     },
     filename: (req, file, cb) => {
       cb(null, `${Date.now()}-${file.originalname}`); // Renombrar el archivo
@@ -100,7 +100,7 @@ const storage = multer.diskStorage({
  *         description: Error interno del servidor.
  */
 
-router.post('/registrar-animal',Autenticacion,obtenerUsuarioAutenticado,upload.single('imagen'), AnimalControlador.RegistrarAnimal);
+router.post('/registrar-animal',Autenticacion,ObtenerUsuarioAutenticado,upload.array('imagenes', 5), AnimalControlador.RegistrarAnimal);
 
 
 module.exports = router;

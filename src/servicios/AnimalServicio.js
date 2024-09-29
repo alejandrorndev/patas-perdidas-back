@@ -1,11 +1,12 @@
 const { getConnection } = require("../basededatos/mysql");
 const bcrypt = require("../configuracion/CifrarContrasena");
 const jwt = require("jsonwebtoken");
+const axios = require('axios');
 
 
-const RegistrarAnimal = async (animal, id_usuario,imagen) => {
+const RegistrarAnimal = async (animal, id_usuario,imagenes) => {
     
-const rutaImagen = imagen.path; 
+const rutaImagen = imagenes; 
 
   const {
     nombre_animal,
@@ -14,7 +15,7 @@ const rutaImagen = imagen.path;
     color,
     descripcion,
     fecha_perdida,
-    estado
+    direccion
   } = animal;
 
   const date = Date.now();
@@ -27,7 +28,7 @@ const rutaImagen = imagen.path;
     color,
     descripcion,
     fecha_perdida,
-    estado,
+    estado:'perdido',
     id_usuario,
     fecha_reporte: date_time
   }
@@ -43,24 +44,46 @@ const rutaImagen = imagen.path;
 
     const id_Animal_autogenerado = resultado.insertId;
 
-    const AnimalaRegistrarFoto = {
-        id_animal:id_Animal_autogenerado,
-        url_foto:rutaImagen,
-        fecha_subida: date_time
+    for (const imagen of rutaImagen) {
+        const AnimalaRegistrarFoto = {
+          id_animal: id_Animal_autogenerado,
+          url_foto: imagen,
+          fecha_subida: date_time
+        };
+  
+        const queryFoto = `INSERT INTO fotos_animales SET ?`;
+        await connection.query(queryFoto, AnimalaRegistrarFoto);
       }
 
-    const queryFoto = `INSERT INTO fotos_animales SET ? `;
 
-    const resultadoFoto = await connection.query(queryFoto, AnimalaRegistrarFoto);
-    
-    return { message: "Animal registrado exitosamente", 
+      const coordenadas = await ObtenerCoordenadas(direccion)
+
+      //console.log('coordenadas',coordenadas)
+
+      const AnmaleRegistrarUbicacion = {
+        id_animal:id_Animal_autogenerado,
+        latitud:coordenadas[1],
+        longitud:coordenadas[0],
+        direccion,
+        fecha_visto:fecha_perdida
+      }
+
+      const queryUbicacion = `INSERT INTO ubicaciones SET ?`;
+      await connection.query(queryUbicacion, AnmaleRegistrarUbicacion);
+
+
+      
+    return { 
+            id:id_Animal_autogenerado, 
             nombre: AnimalaRegistrar.nombre,
             especie:AnimalaRegistrar.especie,
             raza:AnimalaRegistrar.raza,
             color:AnimalaRegistrar.color,
             descripcion:AnimalaRegistrar.descripcion,
             fecha_perdida:AnimalaRegistrar.fecha_perdida,
-            imagen_subida:imagen.filename
+            direccion:AnmaleRegistrarUbicacion.direccion,
+            imagenes_subidas:rutaImagen,
+            message: "Animal registrado exitosamente"
      };
   } catch (error) {
    // console.error("Error al registrar el animal:", error);
@@ -68,8 +91,8 @@ const rutaImagen = imagen.path;
   }
 };
 
-// Obtener el usuario autenticado
-const obtenerUsuarioAutenticado = (req, res, next) => {
+
+const ObtenerUsuarioAutenticado = (req, res, next) => {
   try {
     // Obtener el token del header de autorización
     const token = req.headers.authorization.split(' ')[1]; // Bearer token
@@ -91,4 +114,21 @@ const obtenerUsuarioAutenticado = (req, res, next) => {
   }
 };
 
-module.exports = { obtenerUsuarioAutenticado, RegistrarAnimal };
+const ObtenerCoordenadas = async (direccion) => {
+
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(direccion)}.json`;
+    const params = {
+        access_token: process.env.MAPBOX_ACCESS_TOKEN
+    };
+
+    try {
+        const response = await axios.get(url, { params });
+        const lugar = response.data.features[0];
+        return lugar.center;
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+module.exports = { ObtenerUsuarioAutenticado, RegistrarAnimal };
