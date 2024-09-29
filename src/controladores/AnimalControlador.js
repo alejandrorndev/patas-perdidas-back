@@ -22,7 +22,19 @@ const RegistrarAnimal = async (req, res) => {
     }
   };
   
+  const ObtenerAnimales = async (req,res) => {
+    
+    try{
+        const result = await Animalservicio.ObtenerAnimales();
+        res.status(200).json({ status: 'OK', data: result });
+    } catch (error){
+        res.status(500);
+        res.send(error.message)
+    }
+
+};
 
 module.exports = {
-  RegistrarAnimal
+  RegistrarAnimal,
+  ObtenerAnimales
 };

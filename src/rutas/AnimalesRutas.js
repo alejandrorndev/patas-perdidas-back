@@ -8,12 +8,14 @@ const path = require('path');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, 'public/imagenes_animales');
+        cb(null, 'public/imagenes_animales');
     },
     filename: (req, file, cb) => {
-      cb(null, `${Date.now()}-${file.originalname}`); // Renombrar el archivo
+        const extension = file.originalname.split('.').pop(); // Obtiene la extensión del archivo
+        cb(null, `imagen-${Date.now()}.${extension}`); // Renombrar el archivo con solo el timestamp y la extensión
     },
-  });
+});
+
   
   const upload = multer({ storage });
 
@@ -152,6 +154,8 @@ const storage = multer.diskStorage({
  */
 
 router.post('/registrar-animal',Autenticacion,ObtenerUsuarioAutenticado,upload.array('imagenes', 5), AnimalControlador.RegistrarAnimal);
+
+router.get('/lista-animles',Autenticacion,AnimalControlador.ObtenerAnimales)
 
 
 module.exports = router;

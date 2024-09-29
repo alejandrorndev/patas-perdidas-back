@@ -131,4 +131,40 @@ const ObtenerCoordenadas = async (direccion) => {
 
 }
 
-module.exports = { ObtenerUsuarioAutenticado, RegistrarAnimal };
+const ObtenerAnimales= async () => {
+    const connection = await getConnection();
+    const query = `
+            SELECT 
+            ap.id_animal,
+            ap.nombre_animal,
+            ap.especie,
+            ap.raza,
+            ap.color,
+            ap.descripcion,
+            ap.estado,
+            ub.direccion AS direccion,
+            ap.fecha_perdida,
+            u.nombre AS nombre_usuario,
+            GROUP_CONCAT(f.url_foto) AS fotos_asociadas
+            FROM 
+                animales_perdidos ap 
+            JOIN 
+                usuarios u ON ap.id_usuario = u.id_usuario
+            LEFT JOIN 
+                fotos_animales f ON ap.id_animal = f.id_animal
+            LEFT JOIN 
+                ubicaciones ub ON ap.id_animal = ub.id_animal
+            GROUP BY 
+                ap.id_animal, u.nombre `;
+const result = await connection.query(query);
+const animales = result.map(animal => {
+    return {
+        ...animal,
+        fotos_asociadas: animal.fotos_asociadas ? animal.fotos_asociadas.split(',') : []
+    };
+});
+
+return animales;
+};
+
+module.exports = { ObtenerUsuarioAutenticado, RegistrarAnimal, ObtenerAnimales };
