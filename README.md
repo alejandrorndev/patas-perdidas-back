@@ -5,9 +5,9 @@
 Esta API RESTful proporciona un conjunto de endpoints para gestionar usuarios, animales, ubicaciones y fotos de animales. Las principales funcionalidades incluyen:
 
 - **Usuarios:** Creación, edición, eliminación y listado de usuarios.
+- **Animales:** Creación, edición, eliminación y listado de animales.
 
-
-**Requisitos previos**
+_Requisitos previos_
 
 - **Node.js:** Versión 20.17.0 o superior.
 - **npm:** Versión 10.8.3 o superior.
