@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
 const Autenticacion = require("../configuracion/Autenticacion");
 const AnimalControlador = require('../controladores/AnimalControlador');
 const { ObtenerUsuarioAutenticado } = require('../servicios/AnimalServicio');
-const multer = require('multer');
-const path = require('path');
+
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'public/imagenes_animales');
+        cb(null, 'src/public/imagenes_animales');
     },
     filename: (req, file, cb) => {
         const extension = file.originalname.split('.').pop(); // Obtiene la extensión del archivo
@@ -155,7 +156,240 @@ const storage = multer.diskStorage({
 
 router.post('/registrar-animal',Autenticacion,ObtenerUsuarioAutenticado,upload.array('imagenes', 5), AnimalControlador.RegistrarAnimal);
 
+/**
+ * @swagger
+ * /api/animales/lista-animales:
+ *   get:
+ *     summary: Obtener la lista de animales.
+ *     tags: [Animales]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de animales encontrados.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: OK
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id_animal:
+ *                         type: integer
+ *                         example: 4
+ *                       nombre_animal:
+ *                         type: string
+ *                         example: carlota
+ *                       especie:
+ *                         type: string
+ *                         example: gato
+ *                       raza:
+ *                         type: string
+ *                         example: egipcio
+ *                       color:
+ *                         type: string
+ *                         example: negro
+ *                       descripcion:
+ *                         type: string
+ *                         example: Lleva un collar rojo y tiene una cicatriz en la pata.
+ *                       estado:
+ *                         type: string
+ *                         enum: [encontrado, perdido]
+ *                         example: perdido
+ *                       direccion:
+ *                         type: string
+ *                         example: calle 52 #20-05, El Vergel, Medellín
+ *                       fecha_perdida:
+ *                         type: string
+ *                         format: date-time
+ *                         example: 2024-09-26T05:00:00.000Z
+ *                       nombre_usuario:
+ *                         type: string
+ *                         example: admin
+ *                       fotos_asociadas:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           example: http://localhost:5002/public/imagenes_animales/imagen-1727644411054.png
+ *                   example:
+ *                     - id_animal: 4
+ *                       nombre_animal: carlota
+ *                       especie: gato
+ *                       raza: egipcio
+ *                       color: negro
+ *                       descripcion: Lleva un collar rojo y tiene una cicatriz en la pata.
+ *                       estado: perdido
+ *                       direccion: calle 52 #20-05, El Vergel, Medellín
+ *                       fecha_perdida: 2024-09-26T05:00:00.000Z
+ *                       nombre_usuario: admin
+ *                       fotos_asociadas:
+ *                         - http://localhost:5002/public/imagenes_animales/imagen-1727644411054.png
+ *                         - http://localhost:5002/public/imagenes_animales/imagen-1727644411065.jpeg
+ *                         - http://localhost:5002/public/imagenes_animales/imagen-1727644411061.jpg
+ *                         - http://localhost:5002/public/imagenes_animales/imagen-1727644411065.jpeg
+ *                     - id_animal: 3
+ *                       nombre_animal: carlota
+ *                       especie: gato
+ *                       raza: egipcio
+ *                       color: negro
+ *                       descripcion: Lleva un collar rojo y tiene una cicatriz en la pata.
+ *                       estado: encontrado
+ *                       direccion: calle 52 #20-05, El Vergel, Medellín
+ *                       fecha_perdida: 2024-09-26T05:00:00.000Z
+ *                       nombre_usuario: admin
+ *                       fotos_asociadas:
+ *                         - http://localhost:5002/public/imagenes_animales/imagen-1727640122579.jpg
+ *                         - http://localhost:5002/public/imagenes_animales/imagen-1727640122582.jpeg
+ *                         - http://localhost:5002/public/imagenes_animales/imagen-1727640122570.png
+ *                         - http://localhost:5002/public/imagenes_animales/imagen-1727640122583.jpeg
+ *                     - id_animal: 2
+ *                       nombre_animal: Lola
+ *                       especie: gato
+ *                       raza: criollo
+ *                       color: blanco
+ *                       descripcion: Lleva un collar rojo y tiene una cicatriz en la pata.
+ *                       estado: perdido
+ *                       direccion: calle 52 #20-05, El Vergel, Medellín
+ *                       fecha_perdida: 2024-09-26T05:00:00.000Z
+ *                       nombre_usuario: admin
+ *                       fotos_asociadas:
+ *                         - http://localhost:5002/public/imagenes_animales/imagen-1727639693110.jpeg
+ *                         - http://localhost:5002/public/imagenes_animales/imagen-1727639693088.png
+ *                         - http://localhost:5002/public/imagenes_animales/imagen-1727639693112.jpeg
+ *                         - http://localhost:5002/public/imagenes_animales/imagen-1727639693099.jpg
+ *                     - id_animal: 1
+ *                       nombre_animal: Lola
+ *                       especie: gato
+ *                       raza: criollo
+ *                       color: blanco
+ *                       descripcion: Lleva un collar rojo y tiene una cicatriz en la pata.
+ *                       estado: perdido
+ *                       direccion: calle 52 #20-05, El Vergel, Medellín
+ *                       fecha_perdida: 2024-09-26T05:00:00.000Z
+ *                       nombre_usuario: admin
+ *                       fotos_asociadas:
+ *                         - http://localhost:5002/public/imagenes_animales/imagen-1727639666316.png
+ *                         - http://localhost:5002/public/imagenes_animales/imagen-1727639666365.jpeg
+ *                         - http://localhost:5002/public/imagenes_animales/imagen-1727639666352.jpg
+ *                         - http://localhost:5002/public/imagenes_animales/imagen-1727639666362.jpeg
+ *       401:
+ *         description: Token no proporcionado o inválido.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Token no proporcionado o inválido"
+ *       500:
+ *         description: Error en el servidor.
+ */
+
 router.get('/lista-animles',Autenticacion,AnimalControlador.ObtenerAnimales)
+
+/**
+ * @swagger
+ * /api/animales/obtener-animal/{animalId}:
+ *   get:
+ *     summary: Obtener un animal por su ID.
+ *     tags: [Animales]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: animalId
+ *         in: path
+ *         required: true
+ *         description: ID del animal a buscar.
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     responses:
+ *       200:
+ *         description: Animal encontrado.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: OK
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id_animal:
+ *                         type: integer
+ *                         example: 1
+ *                       nombre_animal:
+ *                         type: string
+ *                         example: Lola
+ *                       especie:
+ *                         type: string
+ *                         example: gato
+ *                       raza:
+ *                         type: string
+ *                         example: criollo
+ *                       color:
+ *                         type: string
+ *                         example: blanco
+ *                       descripcion:
+ *                         type: string
+ *                         example: Lleva un collar rojo y tiene una cicatriz en la pata.
+ *                       estado:
+ *                         type: string
+ *                         enum: [encontrado, perdido]
+ *                         example: perdido
+ *                       direccion:
+ *                         type: string
+ *                         example: calle 52 #20-05, El Vergel, Medellín
+ *                       fecha_perdida:
+ *                         type: string
+ *                         format: date-time
+ *                         example: 2024-09-26T05:00:00.000Z
+ *                       nombre_usuario:
+ *                         type: string
+ *                         example: admin
+ *                       fotos_asociadas:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           example: http://localhost:5002/public/imagenes_animales/imagen-1727639666316.png
+ *       404:
+ *         description: Animal no encontrado.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Animal no encontrado
+ *       401:
+ *         description: No autorizado.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No autorizado
+ *       500:
+ *         description: Error en el servidor.
+ */
+
+router.get('/obtener-animal/:animalId',Autenticacion,AnimalControlador.ObtenerAnimal)
+
+router.put("/actualizar/:animalId",Autenticacion,ObtenerUsuarioAutenticado,upload.array('imagenes', 5),AnimalControlador.ActualizarAnimal);
 
 
 module.exports = router;
