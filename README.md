@@ -5,9 +5,9 @@
 Esta API RESTful proporciona un conjunto de endpoints para gestionar usuarios, animales, ubicaciones y fotos de animales. Las principales funcionalidades incluyen:
 
 - **Usuarios:** Creación, edición, eliminación y listado de usuarios.
+- **Animales:** Creación, edición, eliminación y listado de animales.
 
-
-**Requisitos previos**
+_Requisitos previos_
 
 - **Node.js:** Versión 20.17.0 o superior.
 - **npm:** Versión 10.8.3 o superior.
@@ -22,6 +22,7 @@ Esta API RESTful proporciona un conjunto de endpoints para gestionar usuarios, a
 - **ACCESS_TOKEN_SECRET:** Clave secreta utilizada para firmar los tokens de acceso.
 - **REFRESH_TOKEN_SECRET:** Clave secreta utilizada para firmar los tokens de refresco.
 - **MAPBOX_ACCESS_TOKEN:** Token de acceso para el servicio de Mapbox.
+- **URL_BASE_IMAGENES:** Url en donde estan guardadas las imagenes para poder acceder a ellas por url.
 
 **Instalación y configuración**
 

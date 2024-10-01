@@ -33,12 +33,16 @@ const RegistrarUsuario = async (user) => {
       const connection = await getConnection();
       const result = await connection.query(sql, userRegistered); // Espera la consulta y captura el resultado
   
+      const RolRegistrado = (rol == 1) ? 'admin' : 'usuario';
+
+      const EstadoRegistrado = (estado == 1) ? 'activo' : 'inactivo';
+
       return {
-        id: result.insertId,
+        id_usuario: result.insertId,
         email: userRegistered.email,
         nombre: userRegistered.nombre,
-        rol: userRegistered.rol,
-        estado:userRegistered.estado,
+        rol: RolRegistrado,
+        estado:EstadoRegistrado,
         contrasena: userRegistered.contrasena,
         fecha_registro: userRegistered.fecha_registro,
       };
@@ -86,17 +90,56 @@ const InicioDeSesion = async (user) => {
 
 const ObtenerUsuarios = async () => {
     const connection = await getConnection();
-    const result = await connection.query("SELECT * FROM usuarios");
+    const query = `
+                SELECT
+                  u.id_usuario,
+                  u.nombre,
+                  u.email AS correo,
+                  u.contrasena AS contraseña,
+                  CASE
+                    WHEN u.rol = 1 THEN 'admin'
+                    WHEN u.rol = 2 THEN 'usuario'
+                  END AS perfil,
+                  CASE
+                    WHEN u.estado = 1 THEN 'activo'
+                    WHEN u.estado = 0 THEN 'inactivo'
+                  END AS estado,
+                  u.fecha_registro
+                FROM
+                  usuarios u
+                ORDER BY
+                  u.id_usuario DESC
+              `;  
+    const result = await connection.query(query);
     return result;
 };
 
 const ObtenerUsuario = async (usuarioId) => {
     try {
       const connection = await getConnection();
+
+      const queryXusuario =`
+                SELECT
+                  u.id_usuario,
+                  u.nombre,
+                  u.email AS correo,
+                  u.contrasena AS contraseña,
+                  CASE
+                    WHEN u.rol = 1 THEN 'admin'
+                    WHEN u.rol = 2 THEN 'usuario'
+                  END AS perfil,
+                  CASE
+                    WHEN u.estado = 1 THEN 'activo'
+                    WHEN u.estado = 0 THEN 'inactivo'
+                  END AS estado,
+                  u.fecha_registro
+                FROM
+                  usuarios u
+
+                WHERE id_usuario = ?
+              `;  
   
-      const result = await connection.query(
-        "SELECT * FROM usuarios WHERE id_usuario = ?",
-        [usuarioId]
+      const result = await connection.query(queryXusuario,[usuarioId]
       );
       if (result.length === 0) {
         return null;
@@ -129,11 +172,25 @@ const ActualizarUsuario = async (usuarioId, user) => {
       estado: user.estado,
       fecha_registro: date_time,
     };
+
+    const RolRegistrado = (user.rol == 1) ? 'admin' : 'usuario';
+
+    const EstadoRegistrado = (user.estado == 1) ? 'activo' : 'inactivo';
   
     const sql = `UPDATE usuarios SET ? WHERE id_usuario = ?`;
     const connection = await getConnection();
-    await connection.query(sql, [userRegistered, usuarioId]); // Agregar await aquí
-    console.log("Usuario actualizado exitosamente ID:", usuarioId);
+    const result = await connection.query(sql, [userRegistered, usuarioId]);
+    
+    return {
+      id_usuario: userRegistered.id_usuario,
+      correo: userRegistered.email,
+      nombre: userRegistered.nombre,
+      perfil: RolRegistrado,
+      estado:EstadoRegistrado,
+      contrasena: userRegistered.contrasena,
+      fecha_registro: userRegistered.fecha_registro,
+      message: "Usuario actualizado exitosamente"
+    };
 };
 
 const EliminarUsuario = async (usuarioId) => {

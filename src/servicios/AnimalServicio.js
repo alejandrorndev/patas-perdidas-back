@@ -1,4 +1,5 @@
 const { getConnection } = require("../basededatos/mysql");
+require('dotenv').config();
 const bcrypt = require("../configuracion/CifrarContrasena");
 const jwt = require("jsonwebtoken");
 const axios = require('axios');
@@ -28,7 +29,7 @@ const rutaImagen = imagenes;
     color,
     descripcion,
     fecha_perdida,
-    estado:'perdido',
+    estado:0,
     id_usuario,
     fecha_reporte: date_time
   }
@@ -74,8 +75,8 @@ const rutaImagen = imagenes;
 
       
     return { 
-            id:id_Animal_autogenerado, 
-            nombre: AnimalaRegistrar.nombre,
+            id_animal:id_Animal_autogenerado, 
+            nombre: AnimalaRegistrar.nombre_animal,
             especie:AnimalaRegistrar.especie,
             raza:AnimalaRegistrar.raza,
             color:AnimalaRegistrar.color,
@@ -141,7 +142,10 @@ const ObtenerAnimales= async () => {
             ap.raza,
             ap.color,
             ap.descripcion,
-            ap.estado,
+            CASE
+                WHEN ap.estado = 1 THEN 'encontrado'
+                WHEN ap.estado = 0 THEN 'perdido'
+              END AS estado,
             ub.direccion AS direccion,
             ap.fecha_perdida,
             u.nombre AS nombre_usuario,
@@ -155,16 +159,177 @@ const ObtenerAnimales= async () => {
             LEFT JOIN 
                 ubicaciones ub ON ap.id_animal = ub.id_animal
             GROUP BY 
-                ap.id_animal, u.nombre `;
+                ap.id_animal, u.nombre 
+            ORDER BY
+                  ap.id_animal DESC`;
+
 const result = await connection.query(query);
-const animales = result.map(animal => {
-    return {
-        ...animal,
-        fotos_asociadas: animal.fotos_asociadas ? animal.fotos_asociadas.split(',') : []
-    };
+
+const baseUrl = process.env.URL_BASE_IMAGENES;
+
+const animales = result.map((animal) => {
+  return {
+    ...animal,
+    fotos_asociadas: animal.fotos_asociadas
+      ? animal.fotos_asociadas.split(",").map((url) => baseUrl + url)
+      : [],
+  };
 });
 
 return animales;
 };
 
-module.exports = { ObtenerUsuarioAutenticado, RegistrarAnimal, ObtenerAnimales };
+const ObtenerAnimal = async (animalId) => {
+  try {
+    const connection = await getConnection();
+
+    const queryXanimal = `
+              SELECT 
+            ap.id_animal,
+            ap.nombre_animal,
+            ap.especie,
+            ap.raza,
+            ap.color,
+            ap.descripcion,
+            CASE
+                WHEN ap.estado = 1 THEN 'encontrado'
+                WHEN ap.estado = 0 THEN 'perdido'
+              END AS estado,
+            ub.direccion AS direccion,
+            ap.fecha_perdida,
+            u.nombre AS nombre_usuario,
+            GROUP_CONCAT(f.url_foto) AS fotos_asociadas
+            FROM 
+                animales_perdidos ap 
+            JOIN 
+                usuarios u ON ap.id_usuario = u.id_usuario
+            LEFT JOIN 
+                fotos_animales f ON ap.id_animal = f.id_animal
+            LEFT JOIN 
+                ubicaciones ub ON ap.id_animal = ub.id_animal
+            WHERE 
+                ap.id_animal = ?
+            GROUP BY 
+                ap.id_animal, u.nombre
+            `;  
+
+    const result = await connection.query(queryXanimal,[animalId]);
+
+
+    if (result.length === 0) {
+      return null;
+    }
+  
+const baseUrl = process.env.URL_BASE_IMAGENES;
+
+const animalXid = result.map((animal) => {
+  return {
+    ...animal,
+    fotos_asociadas: animal.fotos_asociadas
+      ? animal.fotos_asociadas.split(",").map((url) => baseUrl + url)
+      : [],
+  };
+});
+
+return animalXid;
+
+  } catch (error) {
+    throw new Error(error.message || 'Error al obtener el animal');
+  }
+};
+
+const ActualizarAnimal = async (animalId, animal,imagenes) => {
+
+  const rutaImagen = imagenes; 
+
+  const {
+    nombre_animal,
+    especie,
+    raza,
+    color,
+    descripcion,
+    direccion
+  } = animal;
+
+
+  const AnimalaActualizar = {
+    nombre_animal:animal.nombre_animal,
+    especie:animal.especie,
+    raza:animal.raza,
+    color:animal.color,
+    descripcion:animal.descripcion
+  }
+  try {
+    
+    const ValidarExistenciaAnimal = await ObtenerAnimal(animalId);
+
+
+    if (!ValidarExistenciaAnimal || ValidarExistenciaAnimal.length === 0) {
+      throw new Error("Animal no encontrado");
+    }
+
+  const sql = `UPDATE animales_perdidos SET ? WHERE id_animal = ?`;
+  const connection = await getConnection();
+  const result = await connection.query(sql, [AnimalaActualizar, animalId]);
+
+  const date = Date.now();
+  const date_time = new Date(date);
+
+  if (rutaImagen && rutaImagen.length > 0) {
+    // Eliminar las imágenes existentes del animal solo si se recibieron nuevas imágenes
+    const queryEliminarFotos = `DELETE FROM fotos_animales WHERE id_animal = ?`;
+    await connection.query(queryEliminarFotos, [animalId]);
+
+    // Insertar las nuevas imágenes
+    for (const imagen of rutaImagen) {
+      const AnimalaRegistrarFoto = {
+        id_animal: animalId,
+        url_foto: imagen,
+        fecha_subida: date_time,
+      };
+
+      const queryInsertarFoto = `INSERT INTO fotos_animales SET ?`;
+      await connection.query(queryInsertarFoto, AnimalaRegistrarFoto);
+    }
+  }
+
+  if (direccion && direccion.trim() !== '') {
+    
+    const coordenadas = await ObtenerCoordenadas(direccion)
+
+
+      const AnmaleRegistrarUbicacion = {
+        id_animal:animalId,
+        latitud:coordenadas[1],
+        longitud:coordenadas[0],
+        direccion:animal.direccion
+      }
+
+      const queryEliminarUbicacion = `DELETE FROM ubicaciones WHERE id_animal = ?`;
+      await connection.query(queryEliminarUbicacion, [animalId]);
+
+      const queryUbicacion = `INSERT INTO ubicaciones SET ?`;
+      await connection.query(queryUbicacion, AnmaleRegistrarUbicacion);
+
+  }
+
+  return { 
+    id_animal:animalId, 
+    nombre: animal.nombre_animal,
+    especie:AnimalaActualizar.especie,
+    raza:AnimalaActualizar.raza,
+    color:AnimalaActualizar.color,
+    descripcion:AnimalaActualizar.descripcion,
+    direccion:animal.direccion = animal.direccion ? animal.direccion : "No se actualizó la dirección",
+    imagenes_subidas:rutaImagen,
+    message: "Animal actualizado exitosamente"
+};
+
+  } catch (error) {
+       console.error("Error al actualizar el animal:", error);
+       throw error;
+  }
+
+};
+
+module.exports = { ObtenerUsuarioAutenticado, RegistrarAnimal, ObtenerAnimales, ObtenerAnimal, ActualizarAnimal };

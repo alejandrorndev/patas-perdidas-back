@@ -33,7 +33,7 @@ const ObtenerUsuarios = async (req,res) => {
     
     try{
         const result = await services.ObtenerUsuarios();
-        res.json(result)
+        res.status(200).json({ status: 'OK', data: result });
     } catch (error){
         res.status(500);
         res.send(error.message)
@@ -74,8 +74,8 @@ const ActualizarUsuario = async (req, res) => {
     }
   
     try {
-      await services.ActualizarUsuario(usuarioId, req.body); // Espera la llamada asíncrona
-      res.send({ status: 'OK', data: req.body });
+      const result = await services.ActualizarUsuario(usuarioId, req.body); // Espera la llamada asíncrona
+      res.status(200).json({ status: 'OK', data: result });
     } catch (error) {
       if (error.message === "Usuario no encontrado") {
         return res.status(404).send({ message: "Usuario no encontrado" });
