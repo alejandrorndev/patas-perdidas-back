@@ -10,13 +10,16 @@ CREATE TABLE usuarios (
 
 CREATE TABLE animales_perdidos (
     id_animal INT AUTO_INCREMENT PRIMARY KEY,
-    nombre_animal VARCHAR(100),
+    nombre_animal VARCHAR(100) NOT NULL,
     especie VARCHAR(100) NOT NULL,
     raza VARCHAR(100),
     color VARCHAR(50),
     descripcion VARCHAR(200),
-    fecha_perdida DATE,
+    fecha_perdida DATE  NOT NULL,
     estado TINYINT DEFAULT 0, -- 0 = perdido , 1 = encontrado , 2 = Entregado al dueño
+    telefono_contacto VARCHAR(15) DEFAULT 0 NOT NULL,
+    telefono_contacto_opcional VARCHAR(15) DEFAULT 0,
+    recompensa DECIMAL(10, 2) DEFAULT 0,
     id_usuario INT,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     fecha_reporte TIMESTAMP DEFAULT CURRENT_TIMESTAMP
