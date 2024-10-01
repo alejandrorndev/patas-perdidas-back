@@ -16,7 +16,10 @@ const rutaImagen = imagenes;
     color,
     descripcion,
     fecha_perdida,
-    direccion
+    direccion,
+    telefono_contacto,
+    telefono_contacto_opcional,
+    recompensa
   } = animal;
 
   const date = Date.now();
@@ -31,7 +34,10 @@ const rutaImagen = imagenes;
     fecha_perdida,
     estado:0,
     id_usuario,
-    fecha_reporte: date_time
+    fecha_reporte: date_time,
+    telefono_contacto:animal.telefono_contacto,
+    telefono_contacto_opcional:animal.telefono_contacto_opcional = animal.telefono_contacto_opcional ? animal.telefono_contacto_opcional : 0,
+    recompensa
   }
 
   try {
@@ -83,11 +89,14 @@ const rutaImagen = imagenes;
             descripcion:AnimalaRegistrar.descripcion,
             fecha_perdida:AnimalaRegistrar.fecha_perdida,
             direccion:AnmaleRegistrarUbicacion.direccion,
+            telefono_contacto_principal:animal.telefono_contacto,
+            telefono_contacto_secundario:animal.telefono_contacto_opcional = animal.telefono_contacto_opcional ? animal.telefono_contacto_opcional : "No se registro el segundo numero de contacto",
+            recompensa:animal.recompensa,
             imagenes_subidas:rutaImagen,
             message: "Animal registrado exitosamente"
      };
   } catch (error) {
-   // console.error("Error al registrar el animal:", error);
+    //console.error("Error al registrar el animal:", error);
     throw error;
   }
 };
@@ -149,6 +158,9 @@ const ObtenerAnimales= async () => {
             ub.direccion AS direccion,
             ap.fecha_perdida,
             u.nombre AS nombre_usuario,
+            ap.telefono_contacto AS telefono_contacto_principal,
+            ap.telefono_contacto_opcional AS telefono_contacto_secundario,
+            ap.recompensa AS recompensa,
             GROUP_CONCAT(f.url_foto) AS fotos_asociadas
             FROM 
                 animales_perdidos ap 
@@ -198,6 +210,9 @@ const ObtenerAnimal = async (animalId) => {
             ub.direccion AS direccion,
             ap.fecha_perdida,
             u.nombre AS nombre_usuario,
+            ap.telefono_contacto AS telefono_contacto_principal,
+            ap.telefono_contacto_opcional AS telefono_contacto_secundario,
+            ap.recompensa AS recompensa,
             GROUP_CONCAT(f.url_foto) AS fotos_asociadas
             FROM 
                 animales_perdidos ap 
@@ -248,7 +263,10 @@ const ActualizarAnimal = async (animalId, animal,imagenes) => {
     raza,
     color,
     descripcion,
-    direccion
+    direccion,
+    telefono_contacto,
+    telefono_contacto_opcional,
+    recompensa
   } = animal;
 
 
@@ -257,7 +275,10 @@ const ActualizarAnimal = async (animalId, animal,imagenes) => {
     especie:animal.especie,
     raza:animal.raza,
     color:animal.color,
-    descripcion:animal.descripcion
+    descripcion:animal.descripcion,
+    telefono_contacto:animal.telefono_contacto,
+    telefono_contacto_opcional:animal.telefono_contacto_opcional = animal.telefono_contacto_opcional ? animal.telefono_contacto_opcional : 0,
+    recompensa
   }
   try {
     
@@ -321,6 +342,9 @@ const ActualizarAnimal = async (animalId, animal,imagenes) => {
     color:AnimalaActualizar.color,
     descripcion:AnimalaActualizar.descripcion,
     direccion:animal.direccion = animal.direccion ? animal.direccion : "No se actualizó la dirección",
+    telefono_contacto_principal:animal.telefono_contacto,
+    telefono_contacto_secundario:animal.telefono_contacto_opcional = animal.telefono_contacto_opcional ? animal.telefono_contacto_opcional : "No se actualizó el segundo numero de contacto",
+    recompensa:animal.recompensa,
     imagenes_subidas:rutaImagen,
     message: "Animal actualizado exitosamente"
 };
