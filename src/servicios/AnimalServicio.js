@@ -76,7 +76,7 @@ const rutaImagen = imagenes;
       
     return { 
             id_animal:id_Animal_autogenerado, 
-            nombre: AnimalaRegistrar.nombre,
+            nombre: AnimalaRegistrar.nombre_animal,
             especie:AnimalaRegistrar.especie,
             raza:AnimalaRegistrar.raza,
             color:AnimalaRegistrar.color,
@@ -238,7 +238,7 @@ return animalXid;
   }
 };
 
-const ActualizarAnimal = async (animalId, animal,id_usuario,imagenes) => {
+const ActualizarAnimal = async (animalId, animal,imagenes) => {
 
   const rutaImagen = imagenes; 
 
@@ -263,11 +263,9 @@ const ActualizarAnimal = async (animalId, animal,id_usuario,imagenes) => {
     
     const ValidarExistenciaAnimal = await ObtenerAnimal(animalId);
 
-      // Si el animal no fue encontrado, devolver un 404
-    if (!ValidarExistenciaAnimal) {
-      return res.status(404).json({
-        message: "Animal no encontrado",
-      });
+
+    if (!ValidarExistenciaAnimal || ValidarExistenciaAnimal.length === 0) {
+      throw new Error("Animal no encontrado");
     }
 
   const sql = `UPDATE animales_perdidos SET ? WHERE id_animal = ?`;
@@ -295,12 +293,10 @@ const ActualizarAnimal = async (animalId, animal,id_usuario,imagenes) => {
     }
   }
 
-
   if (direccion && direccion.trim() !== '') {
     
     const coordenadas = await ObtenerCoordenadas(direccion)
 
-      console.log('coordenadas',coordenadas)
 
       const AnmaleRegistrarUbicacion = {
         id_animal:animalId,
@@ -319,18 +315,18 @@ const ActualizarAnimal = async (animalId, animal,id_usuario,imagenes) => {
 
   return { 
     id_animal:animalId, 
-    nombre: AnimalaActualizar.nombre,
+    nombre: animal.nombre_animal,
     especie:AnimalaActualizar.especie,
     raza:AnimalaActualizar.raza,
     color:AnimalaActualizar.color,
     descripcion:AnimalaActualizar.descripcion,
-    direccion:animal.direccion,
+    direccion:animal.direccion = animal.direccion ? animal.direccion : "No se actualizó la dirección",
     imagenes_subidas:rutaImagen,
     message: "Animal actualizado exitosamente"
 };
 
   } catch (error) {
-       //console.error("Error al actualizar el animal:", error);
+       console.error("Error al actualizar el animal:", error);
        throw error;
   }
 

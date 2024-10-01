@@ -55,8 +55,11 @@ const ObtenerAnimal = async (req,res) => {
 };
 
 const ActualizarAnimal = async (req, res) => {
-  const id_usuario = req.id_usuario;
+  
+ // const id_usuario = req.id_usuario;
   const { animalId } = req.params; 
+
+  //console.log('id_usuario',id_usuario)
 
   if (!animalId) {
     return res.status(400).send({ message: "El ID del animal es requerido." });
@@ -65,13 +68,13 @@ const ActualizarAnimal = async (req, res) => {
   const imagenes = req.files.map(file => file.filename);
 
   try {
-    const result = await Animalservicio.ActualizarAnimal(animalId, req.body, id_usuario, imagenes); // Espera la llamada asíncrona
+    const result = await Animalservicio.ActualizarAnimal(animalId, req.body,imagenes);
     res.status(200).json({ status: 'OK', data: result });
   } catch (error) {
-    if (error.message === "animal no encontrado") {
-      return res.status(404).send({ message: "animal no encontrado" });
+    if (error.message === "Animal no encontrado") {
+      return res.status(404).send({ message: "Animal no encontrado" });
     }
-    console.log(error);
+   //console.log(error);
     return res.status(500).send({ message: "Error interno del servidor" });
   }
 };

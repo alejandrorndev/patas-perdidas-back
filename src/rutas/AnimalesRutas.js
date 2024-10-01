@@ -292,7 +292,7 @@ router.post('/registrar-animal',Autenticacion,ObtenerUsuarioAutenticado,upload.a
  *         description: Error en el servidor.
  */
 
-router.get('/lista-animles',Autenticacion,AnimalControlador.ObtenerAnimales)
+router.get('/lista-animles',Autenticacion,AnimalControlador.ObtenerAnimales);
 
 /**
  * @swagger
@@ -387,9 +387,138 @@ router.get('/lista-animles',Autenticacion,AnimalControlador.ObtenerAnimales)
  *         description: Error en el servidor.
  */
 
-router.get('/obtener-animal/:animalId',Autenticacion,AnimalControlador.ObtenerAnimal)
+router.get('/obtener-animal/:animalId',Autenticacion,AnimalControlador.ObtenerAnimal);
 
-router.put("/actualizar/:animalId",Autenticacion,ObtenerUsuarioAutenticado,upload.array('imagenes', 5),AnimalControlador.ActualizarAnimal);
+/**
+ * @swagger
+ * /api/animales/actualizar-animal/{animalId}:
+ *   put:
+ *     summary: Actualiza la información de un animal
+ *     description: Actualiza los datos de un animal existente, incluyendo la posibilidad de subir hasta 5 imágenes.
+ *     tags:
+ *       - Animales
+ *     parameters:
+ *       - in: path
+ *         name: animalId
+ *         required: true
+ *         description: ID del animal a actualizar
+ *         schema:
+ *           type: integer
+ *       - in: header
+ *         name: Authorization
+ *         required: true
+ *         description: Token de autenticación JWT en formato `Bearer {token}`
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               imagenes:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: Imágenes asociadas al animal (máximo 5)
+ *               nombre_animal:
+ *                 type: string
+ *                 description: Nombre del animal
+ *               especie:
+ *                 type: string
+ *                 description: Especie del animal (ejemplo perro, gato)
+ *               raza:
+ *                 type: string
+ *                 description: Raza del animal
+ *               color:
+ *                 type: string
+ *                 description: Color del animal
+ *               descripcion:
+ *                 type: string
+ *                 description: Descripción del animal (ejemplo detalles, cicatrices)
+ *               direccion:
+ *                 type: string
+ *                 description: Dirección donde se encontró o se perdió el animal
+ *     responses:
+ *       200:
+ *         description: Animal actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "OK"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id_animal:
+ *                       type: integer
+ *                       example: 14
+ *                     nombre:
+ *                       type: string
+ *                       example: "manchas cambiando nombre v1"
+ *                     especie:
+ *                       type: string
+ *                       example: "gato"
+ *                     raza:
+ *                       type: string
+ *                       example: "mencon"
+ *                     color:
+ *                       type: string
+ *                       example: "blanco y negro"
+ *                     descripcion:
+ *                       type: string
+ *                       example: "Lleva un collar marron y tiene una cicatriz en la pata."
+ *                     direccion:
+ *                       type: string
+ *                       example: "calle 50 #20-20, Medellín"
+ *                     imagenes_subidas:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                         example: "imagen-1727811569441.jpeg"
+ *                     message:
+ *                       type: string
+ *                       example: "Animal actualizado exitosamente"
+ *       400:
+ *         description: Error en la solicitud
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "El ID del animal es requerido."
+ *       401:
+ *         description: Token no válido o ausente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Token no valido"
+ *       404:
+ *         description: Animal no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Animal no encontrado"
+ *       500:
+ *         description: Error interno del servidor
+ */
+
+router.put("/actualizar-animal/:animalId",Autenticacion,ObtenerUsuarioAutenticado,upload.array('imagenes', 5),AnimalControlador.ActualizarAnimal);
 
 
 module.exports = router;
