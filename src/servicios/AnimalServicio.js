@@ -115,7 +115,8 @@ const ObtenerUsuarioAutenticado = (req, res, next) => {
 
     // Obtener el id_usuario del token decodificado
     req.id_usuario = decoded.id_usuario;
-   // console.log('decoded.id_usuario',decoded.nombre)
+    req.nombre =decoded.nombre;
+   //console.log('decoded.id_usuario',decoded.nombre)
 
     // Pasar al siguiente middleware
     next();
@@ -356,4 +357,45 @@ const ActualizarAnimal = async (animalId, animal,imagenes) => {
 
 };
 
-module.exports = { ObtenerUsuarioAutenticado, RegistrarAnimal, ObtenerAnimales, ObtenerAnimal, ActualizarAnimal };
+const EliminarAnimal = async (animalId,nombre) => {
+  const connection = await getConnection();
+ 
+  const date = Date.now();
+  const date_time = new Date(date);
+
+  try {
+
+    const verificarAnimalSql = `SELECT COUNT(*) AS count FROM animales_perdidos WHERE id_animal = ?`;
+    const resultadoVerificacion = await connection.query(verificarAnimalSql, [animalId]);
+
+    if (!Array.isArray(resultadoVerificacion) || resultadoVerificacion.length === 0 || resultadoVerificacion[0].count === undefined || resultadoVerificacion[0].count === 0) {
+      return { error: `No se pudo verificar la existencia del animal con ID ${animalId}` };
+    }
+    
+    const count  = resultadoVerificacion[0];
+    if (count === 0) {
+      return { error: `Usuario con ID ${animalId} no encontrado` };
+    }
+
+    const eliminarAnimalSql = `DELETE FROM animales_perdidos WHERE id_animal = ?`;
+    await connection.query(eliminarAnimalSql, [animalId]);
+
+    const eliminarAnimalUbicacionSql = `DELETE FROM ubicaciones WHERE id_animal = ?`;
+    await connection.query(eliminarAnimalUbicacionSql, [animalId]);
+
+    const eliminarAnimalFotosSql = `DELETE FROM fotos_animales WHERE id_animal = ?`;
+    await connection.query(eliminarAnimalFotosSql, [animalId]);
+
+    return { 
+      id_animal:animalId, 
+      nombre_usuario: nombre,
+      fecha:date_time,
+      message: "Animal eliminado exitosamente"
+  };
+
+  } catch (error) {
+    return { error: 'Error interno del servidor' };
+  }
+};
+
+module.exports = { ObtenerUsuarioAutenticado, RegistrarAnimal, ObtenerAnimales, ObtenerAnimal, ActualizarAnimal, EliminarAnimal };

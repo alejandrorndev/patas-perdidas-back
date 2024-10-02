@@ -79,10 +79,31 @@ const ActualizarAnimal = async (req, res) => {
   }
 };
 
+const EliminarAnimal = async (req, res) => {
+  try {
+    //const id_usuario = req.id_usuario;
+    const nombre = req.nombre;
+    //console.log('nombre',nombre)
+    const result = await Animalservicio.EliminarAnimal(req.params.animalId,nombre);
+    //console.log(result)
+    res.status(200).json({ status: 'OK', data: result });
+
+  } catch (e) {
+    if (e.message.includes('No se pudo verificar la existencia del animal')) {
+      res.status(500).json({ error: 'Error interno del servidor' });
+    } else if (e.message.includes('Animal con ID')) {
+      res.status(404).json({ error: e.message });
+    } else {
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  }
+};
+
 
 module.exports = {
   RegistrarAnimal,
   ObtenerAnimales,
   ObtenerAnimal,
-  ActualizarAnimal
+  ActualizarAnimal,
+  EliminarAnimal
 };
