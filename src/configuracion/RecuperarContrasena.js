@@ -23,13 +23,17 @@ const almacenarTokenEnBD = async (email, token) => {
     const connection = await getConnection();
     const tokenExpiracion = new Date(Date.now() + 60 * 60 * 1000); // Expiración de 1 hora
 
-    // Actualiza el usuario con el token de recuperación y la fecha de expiración
-    const query = `
+    try {
+        const query = `
         UPDATE usuarios
         SET token_recuperacion = ?, token_expiracion = ?
-        WHERE email = ?
-    `;
+        WHERE email = ? `;
+
     await connection.query(query, [token, tokenExpiracion, email]);
+
+    } catch (error) {
+      return { error: 'Error interno del servidor' };  
+    }
 };
 
 // Función que genera el token y lo almacena en la base de datos
@@ -54,28 +58,52 @@ const procesarRecuperacionContrasena = async (email) => {
 };
 
 const validarTokenRecuperacion = async (token) => {
-
     try {
-
+        // Verificar el token y extraer el email
         const decoded = jwt.verify(token, process.env.RESET_PASSWORD_SECRET || 'myresetsecretkey');
         const email = decoded.email;
-        //console.log('email',email)
+
         const connection = await getConnection();
         const query = `
             SELECT * FROM usuarios 
             WHERE email = ? AND token_recuperacion = ? AND token_expiracion > NOW()
         `;
-        const result = await connection.query(query, [email,token]);
-        //console.log('result',result)
-        if (result.length === 0) {
-            throw new Error('Token inválido o expirado.');
-        }
-        return email; 
         
-    } catch (error) {
-       // console.log(error);
-        throw new Error('Token inválido o expirado.');
+        const result = await connection.query(query, [email, token]);
 
+        console.log('result',result);
+        console.log('result typeof', typeof result);
+
+
+        // Si no hay resultados, el token es inválido o ha expirado
+        if (!result || result.length === 0) {
+            // Limpiar el token y la expiración de la base de datos
+            await UsuarioServicio.LimpiarTokenRecuperacion(email);
+
+            // Enviar un mensaje claro al usuario indicando que el token ha expirado
+            return {
+                error: true,
+                message: 'El token ha expirado. Por favor, solicita un nuevo enlace de recuperación de contraseña.'
+            };
+        }
+
+        // Si el token es válido, devolver el email
+        return { email, error: false };
+
+    } catch (error) {
+        // Detectar si el error es porque el token ha expirado
+        if (error.name === 'TokenExpiredError') {
+            return {
+                error: true,
+                message: 'El token ha expirado. Por favor, solicita un nuevo enlace de recuperación de contraseña.'
+            };
+        }
+
+        // Manejar errores como token inválido o mal formado
+        return {
+            error: true,
+            message: 'El token es inválido o está mal formado. Por favor, solicita un nuevo enlace.'
+        };
     }
 };
 

@@ -128,35 +128,37 @@ const RestablecerContrasena = async (req,res) => {
 
   };
   
-const RecuperarContrasena = async (req, res) => {
-    const  { token }  = req.params;
-    const  { nuevaContrasena }  = req.body;
+  const RecuperarContrasena = async (req, res) => {
+    const { token } = req.params;
+    const { nuevaContrasena } = req.body;
 
     try {
+        // Validar el token de recuperación
+        const { email, error, message } = await ServicioRecuperarContrasena.validarTokenRecuperacion(token);
 
-      const email = await ServicioRecuperarContrasena.validarTokenRecuperacion(token);
-
-        if (email) {
-
-          const resultadoActualizacion =  await services.ActualizarContrasena(email, nuevaContrasena);
-            
-            // Limpiar el token de recuperación de la base de datos
-           await services.LimpiarTokenRecuperacion(email);
-            
-           res.send( { status: 'OK', data: resultadoActualizacion});
-        } else {
-            res.status(400).json({ error: 'Token inválido o expirado.' });
+        // Si hay un error, devolver la respuesta adecuada
+        if (error) {
+            return res.status(400).json({ error: message });
         }
+
+        // Si el token es válido, actualizar la contraseña
+        const resultadoActualizacion = await services.ActualizarContrasena(email, nuevaContrasena);
+
+        // Limpiar el token de recuperación de la base de datos
+        await services.LimpiarTokenRecuperacion(email);
+
+        // Responder con éxito
+        return res.status(200).json({ status: 'OK', data: resultadoActualizacion });
 
     } catch (e) {
-       console.log(e);
-        if (e.message === 'Token inválido o expirado.') {
-            res.status(400).json({ error: 'Token inválido o expirado.' });
-        } else {
-            res.status(500).json({ error: 'Error interno del servidor' });
-        }
+        console.error(e);
+
+        // Si ocurre un error inesperado, responder con un error 500
+        return res.status(500).json({ error: 'Error interno del servidor.' });
     }
 };
+
+
 
 module.exports = {
     ObtenerUsuarios,
