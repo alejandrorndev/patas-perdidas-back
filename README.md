@@ -23,6 +23,7 @@ _Requisitos previos_
 - **REFRESH_TOKEN_SECRET:** Clave secreta utilizada para firmar los tokens de refresco.
 - **MAPBOX_ACCESS_TOKEN:** Token de acceso para el servicio de Mapbox.
 - **URL_BASE_IMAGENES:** Url en donde estan guardadas las imagenes para poder acceder a ellas por url.
+- **RESET_PASSWORD_SECRET:** Clave secreta utilizada para firmar los tokens de recuperar constraseña.
 
 **Instalación y configuración**
 
