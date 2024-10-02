@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Autenticacion = require("../configuracion/Autenticacion");
 const usuarioControlador = require('../controladores/UsuarioControlador');
+const { ObtenerUsuarioAutenticado } = require('../servicios/AnimalServicio');
 const {
     validardorRegistroUsuario,
     validardorInicioSesion,
@@ -637,7 +638,7 @@ router.put("/:usuarioId",validardorActualizacionUsuario,Autenticacion,usuarioCon
  *                   example: "Error al eliminar el usuario: No se pudo verificar la existencia del usuario con ID 200"
  */
 
-router.delete("/:usuarioId",validardorUsuarioId,Autenticacion,usuarioControlador.EliminarUsuario);
+router.delete("/:usuarioId",validardorUsuarioId,Autenticacion,ObtenerUsuarioAutenticado,usuarioControlador.EliminarUsuario);
 
 module.exports = router;
 

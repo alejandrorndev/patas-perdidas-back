@@ -87,9 +87,11 @@ const ActualizarUsuario = async (req, res) => {
 
 const EliminarUsuario = async (req, res) => {
     try {
-      const result = await services.EliminarUsuario(req.params.usuarioId);
+      const nombre = req.nombre;
+     // console.log('nombre',nombre)
+      const result = await services.EliminarUsuario(req.params.usuarioId,nombre);
       //console.log(result)
-      res.status(200).json(result);
+      res.status(200).json({ status: 'OK', data: result });
   
     } catch (e) {
       if (e.message.includes('No se pudo verificar la existencia del usuario')) {

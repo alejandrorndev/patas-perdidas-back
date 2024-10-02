@@ -193,8 +193,11 @@ const ActualizarUsuario = async (usuarioId, user) => {
     };
 };
 
-const EliminarUsuario = async (usuarioId) => {
+const EliminarUsuario = async (usuarioId,nombre) => {
     const connection = await getConnection();
+
+    const date = Date.now();
+    const date_time = new Date(date);
   
     try {
       // Paso 1: Verificar si el usuario existe
@@ -215,7 +218,12 @@ const EliminarUsuario = async (usuarioId) => {
       const eliminarUsuarioSql = `DELETE FROM usuarios WHERE id_usuario = ?`;
       await connection.query(eliminarUsuarioSql, [usuarioId]);
   
-      return { status: "OK", message: "Usuario eliminado exitosamente" };
+      return {       
+        id_usuario:usuarioId, 
+        nombre_usuario: nombre,
+        fecha:date_time,
+        message: "Usuario eliminado exitosamente"
+      };
   
     } catch (error) {
       // Manejar el error sin lanzarlo, devolviendo un mensaje adecuado
