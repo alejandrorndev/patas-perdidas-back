@@ -5,6 +5,10 @@ const path = require('path');
 const Autenticacion = require("../configuracion/Autenticacion");
 const AnimalControlador = require('../controladores/AnimalControlador');
 const { ObtenerUsuarioAutenticado } = require('../servicios/AnimalServicio');
+const {
+    validadorRegistroAnimal,
+    validardorAnimalId,
+    validadorActualizarAnimal} =require('../validaciones/validacionAnimales');
 
 
 const storage = multer.diskStorage({
@@ -154,7 +158,7 @@ const storage = multer.diskStorage({
  *         description: Error interno del servidor.
  */
 
-router.post('/registrar-animal',Autenticacion,ObtenerUsuarioAutenticado,upload.array('imagenes', 5), AnimalControlador.RegistrarAnimal);
+router.post('/registrar-animal',Autenticacion,validadorRegistroAnimal,ObtenerUsuarioAutenticado,upload.array('imagenes', 5), AnimalControlador.RegistrarAnimal);
 
 /**
  * @swagger
@@ -387,7 +391,7 @@ router.get('/lista-animles',Autenticacion,AnimalControlador.ObtenerAnimales);
  *         description: Error en el servidor.
  */
 
-router.get('/obtener-animal/:animalId',Autenticacion,AnimalControlador.ObtenerAnimal);
+router.get('/obtener-animal/:animalId',Autenticacion,validardorAnimalId,AnimalControlador.ObtenerAnimal);
 
 /**
  * @swagger
@@ -518,8 +522,121 @@ router.get('/obtener-animal/:animalId',Autenticacion,AnimalControlador.ObtenerAn
  *         description: Error interno del servidor
  */
 
-router.put("/actualizar-animal/:animalId",Autenticacion,ObtenerUsuarioAutenticado,upload.array('imagenes', 5),AnimalControlador.ActualizarAnimal);
+router.put("/actualizar-animal/:animalId",Autenticacion,validadorActualizarAnimal,ObtenerUsuarioAutenticado,upload.array('imagenes', 5),AnimalControlador.ActualizarAnimal);
 
-router.delete("/eliminar-animal/:animalId",Autenticacion,ObtenerUsuarioAutenticado,AnimalControlador.EliminarAnimal);
+/**
+ * @swagger
+ * /api/animales/{animalId}:
+ *   delete:
+ *     summary: Eliminar un animal por ID
+ *     tags: [Animales]
+ *     security:
+ *       - Bearer: []
+ *     parameters:
+ *       - in: path
+ *         name: animalId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del animal a eliminar
+ *         example: 20
+ *       - in: header
+ *         name: Authorization
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *         description: Token JWT para la autenticación
+ *     responses:
+ *       200:
+ *         description: Animal eliminado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: OK
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id_animal:
+ *                       type: string
+ *                       description: ID del animal eliminado
+ *                       example: "20"
+ *                     nombre_usuario:
+ *                       type: string
+ *                       description: Nombre del usuario que realizó la eliminación
+ *                       example: "usuario"
+ *                     fecha:
+ *                       type: string
+ *                       format: date-time
+ *                       description: Fecha y hora de la eliminación
+ *                       example: "2024-10-02T20:26:56.747Z"
+ *                     message:
+ *                       type: string
+ *                       description: Mensaje de confirmación de eliminación
+ *                       example: "Animal eliminado exitosamente"
+ *       400:
+ *         description: Error en los datos de entrada. Por ejemplo, el ID no es un número entero o hay datos inválidos.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errors:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       msg:
+ *                         type: string
+ *                         description: Mensaje de error correspondiente a la validación fallida
+ *                         example: "El ID debe ser un número entero"
+ *                       param:
+ *                         type: string
+ *                         description: El parámetro que falló la validación
+ *                         example: "animalId"
+ *                       location:
+ *                         type: string
+ *                         description: Donde se encontró el error (por ejemplo, en la ruta)
+ *                         example: "path"
+ *       401:
+ *         description: No autorizado. El token es inválido o no fue proporcionado.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *                   example: "Token no proporcionado o inválido"
+ *       404:
+ *         description: Animal no encontrado. El ID proporcionado no corresponde a ningún animal.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *                   example: "Animal con ID 20 no encontrado"
+ *       500:
+ *         description: Error interno del servidor, como fallos al verificar la existencia del animal o al realizar la eliminación.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *                   example: "Error al eliminar el animal: No se pudo verificar la existencia del animal con ID 200"
+ */
+
+router.delete("/eliminar-animal/:animalId",Autenticacion,validardorAnimalId,ObtenerUsuarioAutenticado,AnimalControlador.EliminarAnimal);
 
 module.exports = router;
