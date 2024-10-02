@@ -231,6 +231,48 @@ const EliminarUsuario = async (usuarioId,nombre) => {
     }
   };
 
+const ActualizarContrasena = async (email, nuevaContrasena) => {
+
+  const connection = await getConnection();
+
+
+  try {
+    const hashedContrasena = await bcrypt.encrypt(nuevaContrasena);
+    const query = `
+        UPDATE usuarios
+        SET contrasena = ?
+        WHERE email = ?
+    `;
+    await connection.query(query, [hashedContrasena, email]);
+
+    return {       
+      correo: email,
+      contraseña:hashedContrasena,
+      message: "Contraseña actualizada exitosamente."
+    };
+  } catch (error) {
+    return { error: 'Error interno del servidor' };
+  }
+    
+};
+
+const LimpiarTokenRecuperacion = async (email) => {
+    const connection = await getConnection();
+
+    try {
+
+      const query = `
+      UPDATE usuarios
+      SET token_recuperacion = NULL, token_expiracion = '0000-00-00 00:00:00'
+      WHERE email = ?`;
+
+      await connection.query(query, [email]);
+      
+    } catch (error) {
+      return { error: 'Error interno del servidor' };
+    }
+
+};
   module.exports = {
     ObtenerUsuarios,
     ObtenerUsuarioPorEmail,
@@ -239,4 +281,6 @@ const EliminarUsuario = async (usuarioId,nombre) => {
     ActualizarUsuario,
     EliminarUsuario,
     InicioDeSesion,
+    ActualizarContrasena,
+    LimpiarTokenRecuperacion
   };

@@ -640,5 +640,11 @@ router.put("/:usuarioId",validardorActualizacionUsuario,Autenticacion,usuarioCon
 
 router.delete("/:usuarioId",validardorUsuarioId,Autenticacion,ObtenerUsuarioAutenticado,usuarioControlador.EliminarUsuario);
 
+router.post("/restablecer-contrasena",usuarioControlador.RestablecerContrasena);
+
+router.post("/recuperar-contrasena/:token",usuarioControlador.RecuperarContrasena);
+
+
+
 module.exports = router;
 
