@@ -220,7 +220,7 @@ const EliminarUsuario = async (usuarioId,nombre) => {
   
       return {       
         id_usuario:usuarioId, 
-        nombre_usuario: nombre,
+        nombre_usuario_gestor: nombre,
         fecha:date_time,
         message: "Usuario eliminado exitosamente"
       };
