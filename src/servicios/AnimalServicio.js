@@ -16,7 +16,10 @@ const rutaImagen = imagenes;
     color,
     descripcion,
     fecha_perdida,
-    direccion
+    direccion,
+    telefono_contacto,
+    telefono_contacto_opcional,
+    recompensa
   } = animal;
 
   const date = Date.now();
@@ -31,7 +34,10 @@ const rutaImagen = imagenes;
     fecha_perdida,
     estado:0,
     id_usuario,
-    fecha_reporte: date_time
+    fecha_reporte: date_time,
+    telefono_contacto:animal.telefono_contacto,
+    telefono_contacto_opcional:animal.telefono_contacto_opcional = animal.telefono_contacto_opcional ? animal.telefono_contacto_opcional : 0,
+    recompensa
   }
 
   try {
@@ -83,11 +89,14 @@ const rutaImagen = imagenes;
             descripcion:AnimalaRegistrar.descripcion,
             fecha_perdida:AnimalaRegistrar.fecha_perdida,
             direccion:AnmaleRegistrarUbicacion.direccion,
+            telefono_contacto_principal:animal.telefono_contacto,
+            telefono_contacto_secundario:animal.telefono_contacto_opcional = animal.telefono_contacto_opcional ? animal.telefono_contacto_opcional : "No se registro el segundo numero de contacto",
+            recompensa:animal.recompensa,
             imagenes_subidas:rutaImagen,
             message: "Animal registrado exitosamente"
      };
   } catch (error) {
-   // console.error("Error al registrar el animal:", error);
+    //console.error("Error al registrar el animal:", error);
     throw error;
   }
 };
@@ -106,7 +115,8 @@ const ObtenerUsuarioAutenticado = (req, res, next) => {
 
     // Obtener el id_usuario del token decodificado
     req.id_usuario = decoded.id_usuario;
-   // console.log('decoded.id_usuario',decoded.nombre)
+    req.nombre =decoded.nombre;
+   //console.log('decoded.id_usuario',decoded.nombre)
 
     // Pasar al siguiente middleware
     next();
@@ -149,6 +159,9 @@ const ObtenerAnimales= async () => {
             ub.direccion AS direccion,
             ap.fecha_perdida,
             u.nombre AS nombre_usuario,
+            ap.telefono_contacto AS telefono_contacto_principal,
+            ap.telefono_contacto_opcional AS telefono_contacto_secundario,
+            ap.recompensa AS recompensa,
             GROUP_CONCAT(f.url_foto) AS fotos_asociadas
             FROM 
                 animales_perdidos ap 
@@ -198,6 +211,9 @@ const ObtenerAnimal = async (animalId) => {
             ub.direccion AS direccion,
             ap.fecha_perdida,
             u.nombre AS nombre_usuario,
+            ap.telefono_contacto AS telefono_contacto_principal,
+            ap.telefono_contacto_opcional AS telefono_contacto_secundario,
+            ap.recompensa AS recompensa,
             GROUP_CONCAT(f.url_foto) AS fotos_asociadas
             FROM 
                 animales_perdidos ap 
@@ -248,7 +264,10 @@ const ActualizarAnimal = async (animalId, animal,imagenes) => {
     raza,
     color,
     descripcion,
-    direccion
+    direccion,
+    telefono_contacto,
+    telefono_contacto_opcional,
+    recompensa
   } = animal;
 
 
@@ -257,7 +276,10 @@ const ActualizarAnimal = async (animalId, animal,imagenes) => {
     especie:animal.especie,
     raza:animal.raza,
     color:animal.color,
-    descripcion:animal.descripcion
+    descripcion:animal.descripcion,
+    telefono_contacto:animal.telefono_contacto,
+    telefono_contacto_opcional:animal.telefono_contacto_opcional = animal.telefono_contacto_opcional ? animal.telefono_contacto_opcional : 0,
+    recompensa
   }
   try {
     
@@ -321,6 +343,9 @@ const ActualizarAnimal = async (animalId, animal,imagenes) => {
     color:AnimalaActualizar.color,
     descripcion:AnimalaActualizar.descripcion,
     direccion:animal.direccion = animal.direccion ? animal.direccion : "No se actualizó la dirección",
+    telefono_contacto_principal:animal.telefono_contacto,
+    telefono_contacto_secundario:animal.telefono_contacto_opcional = animal.telefono_contacto_opcional ? animal.telefono_contacto_opcional : "No se actualizó el segundo numero de contacto",
+    recompensa:animal.recompensa,
     imagenes_subidas:rutaImagen,
     message: "Animal actualizado exitosamente"
 };
@@ -332,4 +357,45 @@ const ActualizarAnimal = async (animalId, animal,imagenes) => {
 
 };
 
-module.exports = { ObtenerUsuarioAutenticado, RegistrarAnimal, ObtenerAnimales, ObtenerAnimal, ActualizarAnimal };
+const EliminarAnimal = async (animalId,nombre) => {
+  const connection = await getConnection();
+ 
+  const date = Date.now();
+  const date_time = new Date(date);
+
+  try {
+
+    const verificarAnimalSql = `SELECT COUNT(*) AS count FROM animales_perdidos WHERE id_animal = ?`;
+    const resultadoVerificacion = await connection.query(verificarAnimalSql, [animalId]);
+
+    if (!Array.isArray(resultadoVerificacion) || resultadoVerificacion.length === 0 || resultadoVerificacion[0].count === undefined || resultadoVerificacion[0].count === 0) {
+      return { error: `No se pudo verificar la existencia del animal con ID ${animalId}` };
+    }
+    
+    const count  = resultadoVerificacion[0];
+    if (count === 0) {
+      return { error: `Usuario con ID ${animalId} no encontrado` };
+    }
+
+    const eliminarAnimalSql = `DELETE FROM animales_perdidos WHERE id_animal = ?`;
+    await connection.query(eliminarAnimalSql, [animalId]);
+
+    const eliminarAnimalUbicacionSql = `DELETE FROM ubicaciones WHERE id_animal = ?`;
+    await connection.query(eliminarAnimalUbicacionSql, [animalId]);
+
+    const eliminarAnimalFotosSql = `DELETE FROM fotos_animales WHERE id_animal = ?`;
+    await connection.query(eliminarAnimalFotosSql, [animalId]);
+
+    return { 
+      id_animal:animalId, 
+      nombre_usuario: nombre,
+      fecha:date_time,
+      message: "Animal eliminado exitosamente"
+  };
+
+  } catch (error) {
+    return { error: 'Error interno del servidor' };
+  }
+};
+
+module.exports = { ObtenerUsuarioAutenticado, RegistrarAnimal, ObtenerAnimales, ObtenerAnimal, ActualizarAnimal, EliminarAnimal };

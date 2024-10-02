@@ -520,5 +520,6 @@ router.get('/obtener-animal/:animalId',Autenticacion,AnimalControlador.ObtenerAn
 
 router.put("/actualizar-animal/:animalId",Autenticacion,ObtenerUsuarioAutenticado,upload.array('imagenes', 5),AnimalControlador.ActualizarAnimal);
 
+router.delete("/eliminar-animal/:animalId",Autenticacion,ObtenerUsuarioAutenticado,AnimalControlador.EliminarAnimal);
 
 module.exports = router;

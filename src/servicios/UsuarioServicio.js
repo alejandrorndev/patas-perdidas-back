@@ -193,8 +193,11 @@ const ActualizarUsuario = async (usuarioId, user) => {
     };
 };
 
-const EliminarUsuario = async (usuarioId) => {
+const EliminarUsuario = async (usuarioId,nombre) => {
     const connection = await getConnection();
+
+    const date = Date.now();
+    const date_time = new Date(date);
   
     try {
       // Paso 1: Verificar si el usuario existe
@@ -215,7 +218,12 @@ const EliminarUsuario = async (usuarioId) => {
       const eliminarUsuarioSql = `DELETE FROM usuarios WHERE id_usuario = ?`;
       await connection.query(eliminarUsuarioSql, [usuarioId]);
   
-      return { status: "OK", message: "Usuario eliminado exitosamente" };
+      return {       
+        id_usuario:usuarioId, 
+        nombre_usuario_gestor: nombre,
+        fecha:date_time,
+        message: "Usuario eliminado exitosamente"
+      };
   
     } catch (error) {
       // Manejar el error sin lanzarlo, devolviendo un mensaje adecuado
@@ -223,6 +231,48 @@ const EliminarUsuario = async (usuarioId) => {
     }
   };
 
+const ActualizarContrasena = async (email, nuevaContrasena) => {
+
+  const connection = await getConnection();
+
+
+  try {
+    const hashedContrasena = await bcrypt.encrypt(nuevaContrasena);
+    const query = `
+        UPDATE usuarios
+        SET contrasena = ?
+        WHERE email = ?
+    `;
+    await connection.query(query, [hashedContrasena, email]);
+
+    return {       
+      correo: email,
+      contraseña:hashedContrasena,
+      message: "Contraseña actualizada exitosamente."
+    };
+  } catch (error) {
+    return { error: 'Error interno del servidor' };
+  }
+    
+};
+
+const LimpiarTokenRecuperacion = async (email) => {
+    const connection = await getConnection();
+
+    try {
+
+      const query = `
+      UPDATE usuarios
+      SET token_recuperacion = NULL, token_expiracion = '0000-00-00 00:00:00'
+      WHERE email = ?`;
+
+      await connection.query(query, [email]);
+      
+    } catch (error) {
+      return { error: 'Error interno del servidor' };
+    }
+
+};
   module.exports = {
     ObtenerUsuarios,
     ObtenerUsuarioPorEmail,
@@ -231,4 +281,6 @@ const EliminarUsuario = async (usuarioId) => {
     ActualizarUsuario,
     EliminarUsuario,
     InicioDeSesion,
+    ActualizarContrasena,
+    LimpiarTokenRecuperacion
   };

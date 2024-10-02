@@ -1,7 +1,5 @@
 const services = require('../servicios/UsuarioServicio')
-
-
-
+const ServicioRecuperarContrasena = require("../configuracion/RecuperarContrasena");
 
 const RegistrarUsuario = async (req,res) => {
 
@@ -87,9 +85,11 @@ const ActualizarUsuario = async (req, res) => {
 
 const EliminarUsuario = async (req, res) => {
     try {
-      const result = await services.EliminarUsuario(req.params.usuarioId);
+      const nombre = req.nombre;
+     // console.log('nombre',nombre)
+      const result = await services.EliminarUsuario(req.params.usuarioId,nombre);
       //console.log(result)
-      res.status(200).json(result);
+      res.status(200).json({ status: 'OK', data: result });
   
     } catch (e) {
       if (e.message.includes('No se pudo verificar la existencia del usuario')) {
@@ -102,11 +102,69 @@ const EliminarUsuario = async (req, res) => {
     }
   };
 
+
+const RestablecerContrasena = async (req,res) => {
+
+    try {
+
+      const { email } = req.body;
+
+
+      if (!email) {
+          return res.status(400).json({ error: 'El email es requerido.' });
+      }
+
+      const urlRecuperacion = await ServicioRecuperarContrasena.procesarRecuperacionContrasena(email);
+
+      res.status(200).json({ status: 'OK', url: urlRecuperacion });
+
+    } catch (error) {
+      if (error.message === "Usuario no encontrado") {
+        return res.status(404).send({ message: "Usuario no encontrado" });
+      }
+        console.log(error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+
+  };
+  
+const RecuperarContrasena = async (req, res) => {
+    const  { token }  = req.params;
+    const  { nuevaContrasena }  = req.body;
+
+    try {
+
+      const email = await ServicioRecuperarContrasena.validarTokenRecuperacion(token);
+
+        if (email) {
+
+          const resultadoActualizacion =  await services.ActualizarContrasena(email, nuevaContrasena);
+            
+            // Limpiar el token de recuperación de la base de datos
+           await services.LimpiarTokenRecuperacion(email);
+            
+           res.send( { status: 'OK', data: resultadoActualizacion});
+        } else {
+            res.status(400).json({ error: 'Token inválido o expirado.' });
+        }
+
+    } catch (e) {
+       console.log(e);
+        if (e.message === 'Token inválido o expirado.') {
+            res.status(400).json({ error: 'Token inválido o expirado.' });
+        } else {
+            res.status(500).json({ error: 'Error interno del servidor' });
+        }
+    }
+};
+
 module.exports = {
     ObtenerUsuarios,
     ObtenerUsuario,
     RegistrarUsuario,
     ActualizarUsuario,
     EliminarUsuario,
-    InicioDeSesion
+    InicioDeSesion,
+    RecuperarContrasena,
+    RestablecerContrasena
 }
