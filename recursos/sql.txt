@@ -5,7 +5,9 @@ CREATE TABLE usuarios (
     contrasena VARCHAR(255) NOT NULL,
     rol TINYINT DEFAULT 2, -- 1 = admin , 2 =  usuario, 3 = usuario_no_registrado
     estado TINYINT DEFAULT 1, -- 0 = inactivo , 1 = activo
-    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    token_recuperacion VARCHAR(255),
+    token_expiracion TIMESTAMP
 );
 
 CREATE TABLE animales_perdidos (
