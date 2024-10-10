@@ -1,19 +1,20 @@
 const services = require('../servicios/UsuarioServicio')
 const ServicioRecuperarContrasena = require("../configuracion/RecuperarContrasena");
 
-const RegistrarUsuario = async (req,res) => {
-
-    try {
-        
-        const userRegistered = await services.RegistrarUsuario(req.body)
-        res.send( { status: 'OK', data: userRegistered})
-
-      } catch (e) {
-        console.log(e)
-        res.status(500).json({ error: 'Error interno del servidor' });
-      }
-    
+const RegistrarUsuario = async (req, res) => {
+  try {
+    const userRegistered = await services.RegistrarUsuario(req.body);
+    res.status(201).json({ status: 'success', data: userRegistered });
+  } catch (e) {
+    if (e.message === 'El usuario ya existe') {
+      res.status(409).json({ status: 'error', message: e.message });
+    } else {
+      console.error(e);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  }
 };
+
 
 const InicioDeSesion = async (req, res) => {
     try {
