@@ -12,43 +12,44 @@ const ObtenerUsuarioPorEmail = async (email) => {
 };
 
 const RegistrarUsuario = async (user) => {
-    const { email, contrasena, nombre, rol, estado  } = user;
-  
-    const date = Date.now();
-    const date_time = new Date(date);
-  
-    const userExist = await ObtenerUsuarioPorEmail(email);
-  
-    if (userExist.length === 0) {
-      const userRegistered = {
-        nombre,
-        email,
-        contrasena: await bcrypt.encrypt(contrasena),
-        rol,
-        estado,
-        fecha_registro: date_time,
-      };
-  
-      const sql = `INSERT INTO usuarios SET ?`;
-      const connection = await getConnection();
-      const result = await connection.query(sql, userRegistered); // Espera la consulta y captura el resultado
-  
-      const RolRegistrado = (rol == 1) ? 'admin' : 'usuario';
+  const { email, contrasena, nombre, rol, estado } = user;
 
-      const EstadoRegistrado = (estado == 1) ? 'activo' : 'inactivo';
+  const date = Date.now();
+  const date_time = new Date(date);
 
-      return {
-        id_usuario: result.insertId,
-        email: userRegistered.email,
-        nombre: userRegistered.nombre,
-        rol: RolRegistrado,
-        estado:EstadoRegistrado,
-        contrasena: userRegistered.contrasena,
-        fecha_registro: userRegistered.fecha_registro,
-      };
-    }
-    return "El usuario ya existe";
+  const userExist = await ObtenerUsuarioPorEmail(email);
+
+  if (userExist.length === 0) {
+    const userRegistered = {
+      nombre,
+      email,
+      contrasena: await bcrypt.encrypt(contrasena),
+      rol,
+      estado,
+      fecha_registro: date_time,
+    };
+
+    const sql = `INSERT INTO usuarios SET ?`;
+    const connection = await getConnection();
+    const result = await connection.query(sql, userRegistered); // Espera la consulta y captura el resultado
+
+    const RolRegistrado = rol == 1 ? 'admin' : 'usuario';
+    const EstadoRegistrado = estado == 1 ? 'activo' : 'inactivo';
+
+    return {
+      id_usuario: result.insertId,
+      email: userRegistered.email,
+      nombre: userRegistered.nombre,
+      rol: RolRegistrado,
+      estado: EstadoRegistrado,
+      contrasena: userRegistered.contrasena,
+      fecha_registro: userRegistered.fecha_registro,
+    };
+  }
+
+  throw new Error('El usuario ya existe');
 };
+
 
 const InicioDeSesion = async (user) => {
     const { email, contrasena } = user;
