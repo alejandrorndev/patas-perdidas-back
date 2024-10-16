@@ -14,6 +14,7 @@ CREATE TABLE animales_perdidos (
     id_animal INT AUTO_INCREMENT PRIMARY KEY,
     nombre_animal VARCHAR(100) NOT NULL,
     especie VARCHAR(100) NOT NULL,
+    edad INT NOT NULL,
     raza VARCHAR(100),
     color VARCHAR(50),
     descripcion VARCHAR(200),
