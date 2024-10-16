@@ -19,7 +19,8 @@ const rutaImagen = imagenes;
     direccion,
     telefono_contacto,
     telefono_contacto_opcional,
-    recompensa
+    recompensa,
+    edad
   } = animal;
 
   const date = Date.now();
@@ -32,6 +33,7 @@ const rutaImagen = imagenes;
     color,
     descripcion,
     fecha_perdida,
+    edad,
     estado:0,
     id_usuario,
     fecha_reporte: date_time,
@@ -92,6 +94,7 @@ const rutaImagen = imagenes;
             telefono_contacto_principal:animal.telefono_contacto,
             telefono_contacto_secundario:animal.telefono_contacto_opcional = animal.telefono_contacto_opcional ? animal.telefono_contacto_opcional : "No se registro el segundo numero de contacto",
             recompensa:animal.recompensa,
+            edad:AnimalaRegistrar.edad,
             imagenes_subidas:rutaImagen,
             message: "Animal registrado exitosamente"
      };
