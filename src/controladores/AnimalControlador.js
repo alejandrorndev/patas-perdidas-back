@@ -10,7 +10,7 @@ const RegistrarAnimal = async (req, res) => {
      // console.log('imagenes controlador',imagenes);
       const result = await Animalservicio.RegistrarAnimal(req.body, id_usuario, imagenes);
 
-      res.status(200).json({ status: 'OK', data: result });
+      res.status(201).json({ status: 'OK', data: result });
     } catch (e) {
      console.error(e); // Agregar esto para ver el error en la consola
       res.status(500).json({ error: 'Error interno del servidor' });

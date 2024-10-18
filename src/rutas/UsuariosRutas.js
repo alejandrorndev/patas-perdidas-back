@@ -642,7 +642,7 @@ router.delete("/:usuarioId",validardorUsuarioId,Autenticacion,ObtenerUsuarioAute
 
 router.post("/restablecer-contrasena",usuarioControlador.RestablecerContrasena);
 
-router.post("/recuperar-contrasena/:token",usuarioControlador.RecuperarContrasena);
+router.post("/recuperar-contrasena/token=:token",usuarioControlador.RecuperarContrasena);
 
 
 
